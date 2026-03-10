@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consulta de Notas — IE</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Variables ─────────────────────────────────────────── */
+    :root {
+      --api: "http://127.0.0.1:8000"; /* ← CAMBIA ESTO por la URL de tu servidor */
+      --bg:       #F7F5F0;
+      --surface:  #FFFFFF;
+      --border:   #E4E0D8;
+      --text:     #1A1A18;
+      --muted:    #7A7670;
+      --accent:   #1B4332;
+      --accent2:  #2D6A4F;
+      --superior: #1B4332;
+      --alto:     #2D6A4F;
+      --basico:   #92400E;
+      --bajo:     #991B1B;
+      --sup-bg:   #D1FAE5;
+      --alt-bg:   #DCFCE7;
+      --bas-bg:   #FEF3C7;
+      --baj-bg:   #FEE2E2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    /* ── Wrapper ───────────────────────────────────────────── */
+    .wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .header {
+      margin-bottom: 36px;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 20px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .titulo {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--accent);
+      line-height: 1.1;
+    }
+
+    .subtitulo {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+      font-weight: 300;
+    }
+
+    .badge-periodo {
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Filtros ────────────────────────────────────────────── */
+    .filtros {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .filtro-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .filtro-group label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .filtro-group select,
+    .filtro-group input {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .filtro-group select:focus,
+    .filtro-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-buscar {
+      align-self: flex-end;
+      padding: 10px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+
+    .btn-buscar:hover  { background: var(--accent2); }
+    .btn-buscar:active { transform: scale(.98); }
+
+    /* ── Stats bar ──────────────────────────────────────────── */
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .stat-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-chip strong { font-weight: 600; color: var(--accent); }
+
+    /* ── Tabla ──────────────────────────────────────────────── */
+    .tabla-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: var(--accent);
+      color: #fff;
+      padding: 13px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    thead th:nth-child(5),
+    thead th:nth-child(6) { text-align: center; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+      animation: fadeRow .3s ease both;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #F0EDE6; }
+
+    tbody td {
+      padding: 11px 16px;
+      vertical-align: middle;
+    }
+
+    tbody td:nth-child(5),
+    tbody td:nth-child(6) { text-align: center; }
+
+    .nombre-cel { font-weight: 500; }
+
+    /* Nota con color */
+    .nota {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .nota.superior { color: var(--superior); }
+    .nota.alto     { color: var(--alto); }
+    .nota.basico   { color: var(--basico); }
+    .nota.bajo     { color: var(--bajo); }
+
+    /* Indicador pill */
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .pill.SUPERIOR { background: var(--sup-bg); color: var(--superior); }
+    .pill.ALTO     { background: var(--alt-bg); color: var(--alto); }
+    .pill.BASICO   { background: var(--bas-bg); color: var(--basico); }
+    .pill.BAJO     { background: var(--baj-bg); color: var(--bajo); }
+
+    /* ── Estados ────────────────────────────────────────────── */
+    .estado {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .estado .icono { font-size: 36px; display: block; margin-bottom: 10px; }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    /* ── Paginación ─────────────────────────────────────────── */
+    .paginacion {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pag-btns { display: flex; gap: 6px; }
+
+    .pag-btn {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s;
+    }
+
+    .pag-btn:hover:not(:disabled)  { border-color: var(--accent); color: var(--accent); }
+    .pag-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .pag-btn.activo   { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── Leyenda ────────────────────────────────────────────── */
+    .leyenda {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .leyenda-item { display: flex; align-items: center; gap: 6px; }
+    .leyenda-dot  { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ── Animaciones ────────────────────────────────────────── */
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadeRow { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <h1 class="titulo">Consulta de Notas</h1>
+        <p class="subtitulo">Institución Educativa · Resultados académicos por estudiante</p>
+      </div>
+      <span class="badge-periodo" id="badge-periodo">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="filtro-group">
+      <label>Grado</label>
+      <select id="sel-grado">
+        <option value="">Todos los grados</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Indicador</label>
+      <select id="sel-indicador">
+        <option value="">Todos</option>
+        <option value="SUPERIOR">Superior</option>
+        <option value="ALTO">Alto</option>
+        <option value="BASICO">Básico</option>
+        <option value="BAJO">Bajo</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Buscar estudiante</label>
+      <input type="text" id="inp-nombre" placeholder="Nombre o apellido..." />
+    </div>
+    <div class="filtro-group">
+      <button class="btn-buscar" onclick="buscar()">Buscar</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <!-- Tabla -->
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Estudiante</th>
+          <th>Grado</th>
+          <th>Curso</th>
+          <th>Nota</th>
+          <th>Indicador</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body">
+        <tr><td colspan="6"><div class="estado"><div class="spinner"></div>Cargando datos...</div></td></tr>
+      </tbody>
+    </table>
+    <div class="paginacion" id="paginacion" style="display:none"></div>
+  </div>
+
+  <!-- Leyenda -->
+  <div class="leyenda">
+    <span class="leyenda-item"><span class="leyenda-dot" style="background:#1B4332"></span>Superior (≥ 90)</span>
+    <span class="leyenda-item"><span class="leyenda-dot" style="background:#2D6A4F"></span>Alto (75–89)</span>
+    <span class="leyenda-item"><span class="leyenda-dot" style="background:#92400E"></span>Básico (60–74)</span>
+    <span class="leyenda-item"><span class="leyenda-dot" style="background:#991B1B"></span>Bajo (&lt; 60)</span>
+  </div>
+
+</div>
+
+<script>
+  /* ── Configuración ──────────────────────────────────────────
+     Cambia API_URL por la URL donde corre tu servidor Python   */
+  const API_URL = 'http://127.0.0.1:8000';
+  const POR_PAGINA = 20;
+
+  let todosLosDatos = [];
+  let paginaActual  = 1;
+
+  /* ── Inicializar ──────────────────────────────────────────── */
+  async function init() {
+    await cargarGrados();
+    await buscar();
+  }
+
+  async function cargarGrados() {
+    try {
+      const res  = await fetch(`${API_URL}/grados`);
+      const data = await res.json();
+      const sel  = document.getElementById('sel-grado');
+      Object.keys(data.grados).sort().forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = `${g}  (${data.grados[g]})`;
+        sel.appendChild(opt);
+      });
+    } catch(e) {
+      console.error('Error cargando grados', e);
+    }
+  }
+
+  /* ── Buscar ───────────────────────────────────────────────── */
+  async function buscar() {
+    paginaActual = 1;
+    mostrarCargando();
+
+    const grado     = document.getElementById('sel-grado').value;
+    const indicador = document.getElementById('sel-indicador').value;
+    const nombre    = document.getElementById('inp-nombre').value.trim();
+
+    const params = new URLSearchParams();
+    if (grado)     params.set('grado', grado);
+    if (indicador) params.set('indicador', indicador);
+    if (nombre)    params.set('nombre', nombre);
+
+    try {
+      const res  = await fetch(`${API_URL}/notas?${params}`);
+      const data = await res.json();
+      todosLosDatos = data.datos || [];
+      renderStats(data);
+      renderTabla();
+    } catch(e) {
+      mostrarError();
+    }
+  }
+
+  /* ── Render tabla ─────────────────────────────────────────── */
+  function renderTabla() {
+    const tbody = document.getElementById('tabla-body');
+    const inicio = (paginaActual - 1) * POR_PAGINA;
+    const pagina = todosLosDatos.slice(inicio, inicio + POR_PAGINA);
+
+    if (pagina.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6">
+        <div class="estado"><span class="icono">🔍</span>Sin resultados para los filtros seleccionados.</div>
+      </td></tr>`;
+      document.getElementById('paginacion').style.display = 'none';
+      return;
+    }
+
+    tbody.innerHTML = pagina.map((r, i) => {
+      const ind  = (r.indicador_desempeno || '—').toUpperCase();
+      const cls  = ['SUPERIOR','ALTO','BASICO','BAJO'].includes(ind) ? ind.toLowerCase() : '';
+      const num  = inicio + i + 1;
+      return `
+        <tr style="animation-delay:${i * 25}ms">
+          <td style="color:var(--muted);font-size:12px">${num}</td>
+          <td class="nombre-cel">${r.estudiante}</td>
+          <td>${r.grado}</td>
+          <td>${r.curso}</td>
+          <td><span class="nota ${cls}">${r.nota_definitiva ?? '—'}</span></td>
+          <td><span class="pill ${ind}">${ind}</span></td>
+        </tr>`;
+    }).join('');
+
+    renderPaginacion();
+  }
+
+  /* ── Paginación ───────────────────────────────────────────── */
+  function renderPaginacion() {
+    const total  = todosLosDatos.length;
+    const paginas = Math.ceil(total / POR_PAGINA);
+    const pag    = document.getElementById('paginacion');
+
+    if (paginas <= 1) { pag.style.display = 'none'; return; }
+    pag.style.display = 'flex';
+
+    const inicio = (paginaActual - 1) * POR_PAGINA + 1;
+    const fin    = Math.min(paginaActual * POR_PAGINA, total);
+
+    let btns = '';
+    for (let p = 1; p <= paginas; p++) {
+      btns += `<button class="pag-btn ${p === paginaActual ? 'activo' : ''}"
+        onclick="irPagina(${p})">${p}</button>`;
+    }
+
+    pag.innerHTML = `
+      <span>Mostrando ${inicio}–${fin} de ${total} registros</span>
+      <div class="pag-btns">
+        <button class="pag-btn" onclick="irPagina(${paginaActual-1})"
+          ${paginaActual===1?'disabled':''}>← Ant</button>
+        ${btns}
+        <button class="pag-btn" onclick="irPagina(${paginaActual+1})"
+          ${paginaActual===paginas?'disabled':''}>Sig →</button>
+      </div>`;
+  }
+
+  function irPagina(p) {
+    const paginas = Math.ceil(todosLosDatos.length / POR_PAGINA);
+    if (p < 1 || p > paginas) return;
+    paginaActual = p;
+    renderTabla();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Stats ────────────────────────────────────────────────── */
+  function renderStats(data) {
+    const total = data.total || 0;
+    const conteo = {};
+    (data.datos || []).forEach(r => {
+      const ind = r.indicador_desempeno || '—';
+      conteo[ind] = (conteo[ind] || 0) + 1;
+    });
+
+    const prom = total > 0
+      ? (data.datos.reduce((s, r) => s + (r.nota_definitiva || 0), 0) / total).toFixed(1)
+      : '—';
+
+    document.getElementById('stats-bar').innerHTML = `
+      <div class="stat-chip">Total: <strong>${total}</strong></div>
+      <div class="stat-chip">Promedio: <strong>${prom}</strong></div>
+      ${conteo['SUPERIOR'] ? `<div class="stat-chip">Superior: <strong>${conteo['SUPERIOR']}</strong></div>` : ''}
+      ${conteo['ALTO']     ? `<div class="stat-chip">Alto: <strong>${conteo['ALTO']}</strong></div>` : ''}
+      ${conteo['BASICO']   ? `<div class="stat-chip">Básico: <strong>${conteo['BASICO']}</strong></div>` : ''}
+      ${conteo['BAJO']     ? `<div class="stat-chip">Bajo: <strong>${conteo['BAJO']}</strong></div>` : ''}
+    `;
+  }
+
+  /* ── Estados UI ───────────────────────────────────────────── */
+  function mostrarCargando() {
+    document.getElementById('tabla-body').innerHTML =
+      `<tr><td colspan="6"><div class="estado"><div class="spinner"></div>Cargando...</div></td></tr>`;
+    document.getElementById('stats-bar').innerHTML = '';
+    document.getElementById('paginacion').style.display = 'none';
+  }
+
+  function mostrarError() {
+    document.getElementById('tabla-body').innerHTML =
+      `<tr><td colspan="6"><div class="estado">
+        <span class="icono">⚠️</span>
+        No se pudo conectar con el servidor.<br>
+        <small>Verifica que la API esté corriendo en <code>${API_URL}</code></small>
+      </div></td></tr>`;
+  }
+
+  /* ── Badge período ────────────────────────────────────────── */
+  fetch(`${API_URL}/`)
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('badge-periodo').textContent =
+        d.registros_en_cache > 0 ? 'P4 · 2025' : 'Sin datos';
+    }).catch(() => {
+      document.getElementById('badge-periodo').textContent = 'Sin conexión';
+    });
+
+  /* Buscar al presionar Enter en el buscador */
+  document.getElementById('inp-nombre')
+    .addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
+
+  /* Iniciar */
+  init();
+</script>
+</body>
+</html>
