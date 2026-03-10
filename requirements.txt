@@ -1,0 +1,5 @@
+# requirements.txt
+streamlit
+streamlit-option-menu
+pandas
+openpyxl

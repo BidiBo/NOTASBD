@@ -1,0 +1,29 @@
+/* style.css */
+.main {
+    background-color: #f8f9fa;
+}
+
+.stButton>button {
+    width: 100%;
+    border-radius: 8px;
+    height: 3.5em;
+    background-color: #2e7d32; /* Verde institucional */
+    color: white;
+    font-weight: bold;
+    border: none;
+    transition: 0.3s;
+}
+
+.stButton>button:hover {
+    background-color: #1b5e20;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.sidebar .sidebar-content {
+    background-image: linear-gradient(#2e7d32, #1b5e20);
+    color: white;
+}
+
+.reportview-container .main .block-container {
+    padding-top: 2rem;
+}
