@@ -1,0 +1,17 @@
+verificar si tienes Python instalado
+abrir la terminal de comandos y ejecutar Python --versión
+
+debe de salir " Python 3...."
+
+PASO 2 
+
+activar los requirements.txt con el comando:
+
+
+python -m pip install -r requirements.txt
+
+
+y forzar manualmente la activazion del servidor:
+
+
+python -m uvicorn app.api:app --reload --port 8000
